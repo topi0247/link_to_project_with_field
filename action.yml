@@ -93,8 +93,6 @@ runs:
 
         field_key_values=$(echo '${{ inputs.FiledKeyValues }}' | jq -c '.[]')
 
-        enc_data="["
-
         for key_value in $field_key_values; do
           field_name=$(echo $key_value | jq -r '.key')
           value_name=$(echo $key_value | jq -r '.value')
@@ -109,7 +107,6 @@ runs:
           enc_data+="$field_id=$value_id,"
         done
 
-        enc_data="${enc_data%,}]"
         echo "FIELD_ID_VALUES=$enc_data" >> $GITHUB_ENV
 
     - name: Display saved data
@@ -159,7 +156,8 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        for field_id_value in $FIELD_ID_VALUES; do
+        CLEANED_FIELD_ID_VALUES=$(echo "$FIELD_ID_VALUES" | tr -d ',')
+        for field_id_value in $CLEANED_FIELD_ID_VALUES; do
           field_id=$(echo $field_id_value | cut -d '=' -f1)
           value_id=$(echo $field_id_value | cut -d '=' -f2)
 
