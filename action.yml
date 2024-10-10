@@ -122,20 +122,13 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        if [[ "${{ github.event_name }}" == "issues" ]]; then
-          NUMBER=${{ github.event.issue.number }}
-        else
-          NUMBER=${{ github.event.pull_request.number }}
-        fi
-
-        echo "NUMBER=$NUMBER"
-
         REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f2)
 
-        ITEM_ID=$(gh api graphql -f query='
-          query($owner: String!, $name: String!, $issueNumber: Int!) {
-            repository(owner: $owner, name: $name) {
-              issue(number: $issueNumber) {
+        if [[ "${{ github.event_name }}" == "issues" ]]; then
+          ITEM_ID=$(gh api graphql -f query='
+          query($name: String!) {
+            repository(owner: ${{ github.repository_owner }}, name: $name) {
+              issue(number: ${{ github.event.issue.number }}) {
                 projectItems(first: 1) {
                   nodes {
                     id
@@ -143,7 +136,21 @@ runs:
                 }
               }
             }
-          }' -f owner="${{ github.repository_owner }}" -f name="$REPOSITORY_NAME" -f issueNumber=$NUMBER  --jq '.data.repository.issue.projectItems.nodes[0].id')
+          }' -f name="$REPOSITORY_NAME" --jq '.data.repository.issue.projectItems.nodes[0].id')
+        else
+          ITEM_ID=$(gh api graphql -f query='
+          query($name: String!) {
+            repository(owner: ${{ github.repository_owner }}, name: $name) {
+              pull_request(number: ${{ github.event.pull_request.number }}) {
+                projectItems(first: 1) {
+                  nodes {
+                    id
+                  }
+                }
+              }
+            }
+          }' -f name="$REPOSITORY_NAME" --jq '.data.repository.pull_request.projectItems.nodes[0].id')
+        fi
 
         echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
 
