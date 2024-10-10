@@ -1,5 +1,5 @@
 name: "Link to Projects with field"
-description: "This Actions allows you to tie issues and pull requests to Projects by specifying any value for any filed"
+description: "This Action allows you to tie issues and pull requests to Projects by specifying any value for any field"
 inputs:
   GH_TOKEN:
     description: "GitHub Token(Required: repo, admin:org, projects)"
@@ -24,9 +24,9 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        if [[ ${{ github.event.event_name }} == "issue" ]]; then
+        if [[ "${{ github.event_name }}" == "issues" ]]; then
           URL=${{ github.event.issue.html_url }}
-        elif [[ ${{ github.event.event_name }} == "pull_request" ]]; then
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
           URL=${{ github.event.pull_request.html_url }}
         fi
 
@@ -35,75 +35,75 @@ runs:
     - name: get-global-id
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
-      steps:
-        - name: Get Project Data
-          run: |
-            if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
-              gh api graphql -f query='
-                organization(login: "${{ github.repository_owner }}") {
-                  projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                    id
-                    fields(first: 100) {
-                      nodes {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          name
-                          options {
-                            id
-                            name
-                          }
-                        }
+      run: |
+        if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
+          gh api graphql -f query='
+            organization(login: "${{ github.repository_owner }}") {
+              projectV2(number: ${{ inputs.ProjectsNumber }}) {
+                id
+                fields(first: 100) {
+                  nodes {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      name
+                      options {
+                        id
+                        name
                       }
                     }
                   }
-                }' > project_data.json
-            else
-              gh api graphql -f query='
-                user(login: "${{ github.repository_owner }}") {
-                  projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                    id
-                    fields(first: 100) {
-                      nodes {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          name
-                          options {
-                            id
-                            name
-                          }
-                        }
+                }
+              }
+            }' > project_data.json
+        else
+          gh api graphql -f query='
+            user(login: "${{ github.repository_owner }}") {
+              projectV2(number: ${{ inputs.ProjectsNumber }}) {
+                id
+                fields(first: 100) {
+                  nodes {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      name
+                      options {
+                        id
+                        name
                       }
                     }
                   }
-                }' > project_data.json
-            fi
+                }
+              }
+            }' > project_data.json
+        fi
+
     - name: Set Project Data
       run: |
-        if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
+        if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
         else
           echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
         fi
 
-        field_key_values=$(echo '${{ inputs.FieldKeyValues }}' | jq -c '.[]')
+        field_key_values=$(echo '${{ inputs.FiledKeyValues }}' | jq -c '.[]')
 
         enc_data="["
 
         for key_value in $field_key_values; do
-          field_name=$(echo $kv | jq -r '.key')
-          value_name=$(echo $kv | jq -r '.value')
+          field_name=$(echo $key_value | jq -r '.key')
+          value_name=$(echo $key_value | jq -r '.value')
 
-          if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
+          if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
             field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
             value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
           else
             field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
             value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
           fi
+          enc_data+="$field_id=$value_id,"
         done
 
-        env_data="${env_data%,}]"
-        echo "FIELD_ID_VALUES=$env_data" >> $GITHUB_ENV
+        enc_data="${enc_data%,}]"
+        echo "FIELD_ID_VALUES=$enc_data" >> $GITHUB_ENV
 
     - name: Display saved data
       run: |
@@ -113,15 +113,15 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        if [[ ${{ github.event.type == "Issue"  }} ]]; then
-          NUMBER = ${{ github.event.issue.number }}
+        if [[ "${{ github.event_name }}" == "issues" ]]; then
+          NUMBER=${{ github.event.issue.number }}
         else
-          NUMBER = ${{ github.event.pull_request.number }}
+          NUMBER=${{ github.event.pull_request.number }}
         fi
 
-        REPOSITORY_NAME = ${{ github.repository }}.split('/')[1]
+        REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f2)
 
-        ITEM_ID=$(gh api graphql query='
+        ITEM_ID=$(gh api graphql -f query='
           query($owner: String!, $name: String!, $issueNumber: Int!) {
             repository(owner: ${{ github.repository_owner }}, name: $REPOSITORY_NAME) {
               issue(number: $NUMBER) {
@@ -135,8 +135,6 @@ runs:
           }' --jq '.data.repository.issue.projectItems.nodes[0].id')
 
         echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
-      env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}
 
     - name: set-field
       env:
@@ -146,7 +144,5 @@ runs:
           field_id=$(echo $field_id_value | cut -d '=' -f1)
           value_id=$(echo $field_id_value | cut -d '=' -f2)
 
-          gh projects item-edit --id $ITEM_ID --field-id $field_id  --project-id ${{ env.PROJECT_ID }} ---single-select-option-id $value_id
+          gh projects item-edit --id $ITEM_ID --field-id $field_id  --project-id ${{ env.PROJECT_ID }} --single-select-option-id $value_id
         done
-      env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}
