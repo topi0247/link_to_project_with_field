@@ -42,10 +42,7 @@ runs:
         chmod +x ${{ github.action_path }}/src/get-global-id.sh
         ${{ github.action_path }}/src/get-global-id.sh
       env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}
         IS_ORG: ${{ inputs.IsOrganization }}
-        OWNER: ${{ github.repository_owner }}
-        PROJECT_NUM: ${{ inputs.ProjectsNumber }}
         FIELD_KEY_VALUES: ${{ inputs.FiledKeyValues }}
 
     - name: Get Item Id
@@ -54,12 +51,9 @@ runs:
         chmod +x ${{ github.action_path }}/src/get-item-id.sh
         ${{ github.action_path }}/src/get-item-id.sh
       env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}
         REPOSITORY: ${{ github.repository }}
-        EVENT_NAME: ${{ github.event_name }}
         ISSUE_NUMBER: ${{ github.event.issue.number }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
-        OWNER: ${{ github.repository_owner }}
 
     - name: Set Fields
       shell: bash
@@ -67,7 +61,6 @@ runs:
         chmod +x ${{ github.action_path }}/src/set-fields.sh
         ${{ github.action_path }}/src/set-fields.sh
       env:
-        GH_TOKEN: ${{ inputs.GH_TOKEN }}
         FIELD_ID_VALUES: ${{ env.FIELD_ID_VALUES }}
         ITEM_ID: ${{ env.ITEM_ID }}
         PROJECT_ID: ${{ env.PROJECT_ID }}
