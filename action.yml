@@ -127,7 +127,7 @@ runs:
         if [[ "${{ github.event_name }}" == "issues" ]]; then
           ITEM_ID=$(gh api graphql -f query='
           query($name: String!) {
-            repository(owner: ${{ github.repository_owner }}, name: $name) {
+            repository(owner: "${{ github.repository_owner }}", name: $name) {
               issue(number: ${{ github.event.issue.number }}) {
                 projectItems(first: 1) {
                   nodes {
@@ -140,7 +140,7 @@ runs:
         else
           ITEM_ID=$(gh api graphql -f query='
           query($name: String!) {
-            repository(owner: ${{ github.repository_owner }}, name: $name) {
+            repository(owner: "${{ github.repository_owner }}", name: $name) {
               pull_request(number: ${{ github.event.pull_request.number }}) {
                 projectItems(first: 1) {
                   nodes {
