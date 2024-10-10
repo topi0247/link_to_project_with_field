@@ -30,8 +30,8 @@ runs:
         OWNER: ${{ github.repository_owner }}
         PROJECT_NUM: ${{ inputs.ProjectsNumber }}
       run: |
-        chmod +x ./src/link-to-project.sh
-        ./src/link-to-project.sh
+        chmod +x ./src/link-project.sh
+        ./src/link-project.sh
 
     - name: Get Global Id
       shell: bash
