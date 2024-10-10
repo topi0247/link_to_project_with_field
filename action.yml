@@ -17,10 +17,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - link-projects:
+    - name: link-projects
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      runs-on: ubuntu-latest
       run: |
         if [[ ${{ github.event.type }} == "Issue" ]]; then
           URL = ${{ github.event.issue.html_url }}
@@ -30,8 +29,7 @@ runs:
 
         gh project item-add ${{ input.ProjectsNumber }} --owner ${{ github.repository_owner }} --url $URL
 
-    - get-global-id:
-      runs-on: ubuntu-latest
+    - name: get-global-id
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       steps:
@@ -76,39 +74,39 @@ runs:
                   }
                 }' > project_data.json
             fi
-        - name: Set Project Data
-          run: |
-            if [[ ${{ input.IsOrganization }} == "true" ]]; then
-              echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
-            else
-              echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
-            fi
+    - name: Set Project Data
+      run: |
+        if [[ ${{ input.IsOrganization }} == "true" ]]; then
+          echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
+        else
+          echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
+        fi
 
-            field_key_values=$(echo '${{ inputs.FieldKeyValues }}' | jq -c '.[]')
+        field_key_values=$(echo '${{ inputs.FieldKeyValues }}' | jq -c '.[]')
 
-            enc_data="["
+        enc_data="["
 
-            for key_value in $field_key_values; do
-              field_name=$(echo $kv | jq -r '.key')
-              value_name=$(echo $kv | jq -r '.value')
+        for key_value in $field_key_values; do
+          field_name=$(echo $kv | jq -r '.key')
+          value_name=$(echo $kv | jq -r '.value')
 
-              if [[ ${{ input.IsOrganization }} == "true" ]]; then
-                field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
-                value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
-              else
-                field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
-                value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
-              fi
-            done
+          if [[ ${{ input.IsOrganization }} == "true" ]]; then
+            field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
+            value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
+          else
+            field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
+            value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
+          fi
+        done
 
-            env_data="${env_data%,}]"
-            echo "FIELD_ID_VALUES=$env_data" >> $GITHUB_ENV
-        - name: Display saved data
-          run: |
-            echo "Saved Field IDs and Values: $FIELD_ID_VALUES"
+        env_data="${env_data%,}]"
+        echo "FIELD_ID_VALUES=$env_data" >> $GITHUB_ENV
 
-    - get-item-id:
-      runs-on: ubuntu-latest
+    - name: Display saved data
+      run: |
+        echo "Saved Field IDs and Values: $FIELD_ID_VALUES"
+
+    - name: get-item-id
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
@@ -137,8 +135,7 @@ runs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-    - set-field:
-      runs-on: ubuntu-latest
+    - name: set-field
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
