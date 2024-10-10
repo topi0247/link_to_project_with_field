@@ -7,10 +7,10 @@ else
   QUERY_TARGET="user(login: \"$OWNER\")"
 fi
 
-gh api graphql -f query="$(cat <<EOF
+QUERY="
   query {
     $QUERY_TARGET {
-      projectV2(number: $PROJECT_NUMBER) {
+      projectV2(number: $PROJECT_NUM) {
         id
         fields(first: 100) {
           nodes {
@@ -27,8 +27,11 @@ gh api graphql -f query="$(cat <<EOF
       }
     }
   }
-EOF
-)" > project_data.json
+"
+
+echo "QUERY: $QUERY"
+
+gh api graphql -f query="$QUERY" > project_data.json
 
 if [[ "$IS_ORG" == "true" ]]; then
   echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
