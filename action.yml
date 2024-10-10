@@ -21,6 +21,7 @@ runs:
   using: "composite"
   steps:
     - name: link-projects
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
@@ -33,6 +34,7 @@ runs:
         gh project item-add ${{ inputs.ProjectsNumber }} --owner ${{ github.repository_owner }} --url $URL
 
     - name: get-global-id
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
@@ -77,6 +79,7 @@ runs:
         fi
 
     - name: Set Project Data
+      shell: bash
       run: |
         if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
@@ -106,10 +109,12 @@ runs:
         echo "FIELD_ID_VALUES=$enc_data" >> $GITHUB_ENV
 
     - name: Display saved data
+      shell: bash
       run: |
         echo "Saved Field IDs and Values: $FIELD_ID_VALUES"
 
     - name: get-item-id
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
@@ -137,6 +142,7 @@ runs:
         echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
 
     - name: set-field
+      shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
