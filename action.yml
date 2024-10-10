@@ -34,14 +34,14 @@ runs:
         PROJECT_NUM: ${{ inputs.ProjectsNumber }}
       run: |
         pwd
-        chmod +x src/link-project.sh
-        src/link-project.sh
+        chmod +x ${{ github.action_path }}/src/link-project.sh
+        ${{ github.action_path }}/src/link-project.sh
 
     - name: Get Global Id
       shell: bash
       run: |
-        chmod +x src/get-global-id.sh
-        src/get-global-id.sh
+        chmod +x ${{ github.action_path }}/src/get-global-id.sh
+        ${{ github.action_path }}/src/get-global-id.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         IS_ORG: ${{ inputs.IsOrganization }}
@@ -52,8 +52,8 @@ runs:
     - name: Get Item Id
       shell: bash
       run: |
-        chmod +x ./src/get-item-id.sh
-        ./src/get-item-id.sh
+        chmod +x ${{ github.action_path }}//src/get-item-id.sh
+        ${{ github.action_path }}//src/get-item-id.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         REPOSITORY: ${{ github.repository }}
@@ -64,8 +64,8 @@ runs:
     - name: Set Fields
       shell: bash
       run: |
-        chmod +x src/set-fields.sh
-        src/set-fields.sh
+        chmod +x ${{ github.action_path }}/src/set-fields.sh
+        ${{ github.action_path }}/src/set-fields.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         FIELD_ID_VALUES: ${{ env.FIELD_ID_VALUES }}
