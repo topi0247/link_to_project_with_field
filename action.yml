@@ -156,10 +156,9 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        CLEANED_FIELD_ID_VALUES=$(echo "$FIELD_ID_VALUES" | tr -d ',')
-        for field_id_value in $CLEANED_FIELD_ID_VALUES; do
+        for field_id_value in $(echo "$FIELD_ID_VALUES" | tr ',' '\n'); do
           field_id=$(echo $field_id_value | cut -d '=' -f1)
           value_id=$(echo $field_id_value | cut -d '=' -f2)
 
-          gh project item-edit --id $ITEM_ID --field-id $field_id  --project-id ${{ env.PROJECT_ID }} --single-select-option-id $value_id
+          gh project item-edit --id "$ITEM_ID" --field-id "$field_id" --project-id "${{ env.PROJECT_ID }}"" --single-select-option-id "$value_id"
         done
