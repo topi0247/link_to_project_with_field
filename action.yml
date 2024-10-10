@@ -1,6 +1,9 @@
 name: "Link to Projects with field"
 description: "This Actions allows you to tie issues and pull requests to Projects by specifying any value for any filed"
 inputs:
+  GH_TOKEN:
+    description: "GitHub Token(Required: repo, admin:org, projects)"
+    required: true
   IsOrganization:
     description: "Is the repository in an organization"
     default: "false"
@@ -19,7 +22,7 @@ runs:
   steps:
     - name: link-projects
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
         if [[ ${{ github.event.event_name }} == "issue" ]]; then
           URL=${{ github.event.issue.html_url }}
@@ -31,7 +34,7 @@ runs:
 
     - name: get-global-id
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
       steps:
         - name: Get Project Data
           run: |
@@ -108,7 +111,7 @@ runs:
 
     - name: get-item-id
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
         if [[ ${{ github.event.type == "Issue"  }} ]]; then
           NUMBER = ${{ github.event.issue.number }}
@@ -133,11 +136,11 @@ runs:
 
         echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
 
     - name: set-field
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
         for field_id_value in $FIELD_ID_VALUES; do
           field_id=$(echo $field_id_value | cut -d '=' -f1)
@@ -146,4 +149,4 @@ runs:
           gh projects item-edit --id $ITEM_ID --field-id $field_id  --project-id ${{ env.PROJECT_ID }} ---single-select-option-id $value_id
         done
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
