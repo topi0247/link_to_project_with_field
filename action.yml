@@ -20,145 +20,50 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: link-projects
+    - name: Link Project
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
+        EVENT_NAME: ${{ github.event_name }}
+        ISSUE_HTML_URL: ${{ github.event.issue.html_url }}
+        PR_HTML_URL: ${{ github.event.pull_request.html_url }}
+        OWNER: ${{ github.repository_owner }}
+        PROJECT_NUM: ${{ inputs.ProjectsNumber }}
       run: |
-        if [[ "${{ github.event_name }}" == "issues" ]]; then
-          URL=${{ github.event.issue.html_url }}
-        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          URL=${{ github.event.pull_request.html_url }}
-        fi
+        chmod +x ${{ github.action_path }}/src/link-to-project.sh
+        ${{ github.action_path }}/src/link-to-project.sh
 
-        gh project item-add ${{ inputs.ProjectsNumber }} --owner ${{ github.repository_owner }} --url $URL
-
-    - name: get-global-id
+    - name: Get Global Id
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
+        IS_ORG: ${{ inputs.IsOrganization }}
+        OWNER: ${{ github.repository_owner }}
+        PROJECT_NUM: ${{ inputs.ProjectsNumber }}
+        FIELD_KEY_VALUES: ${{ inputs.FiledKeyValues }}
       run: |
-        if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
-          gh api graphql -f query='
-            query {
-              organization(login: "${{ github.repository_owner }}") {
-                projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                  id
-                  fields(first: 100) {
-                    nodes {
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' > project_data.json
-        else
-          gh api graphql -f query='
-            query {
-              user(login: "${{ github.repository_owner }}") {
-                projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                  id
-                  fields(first: 100) {
-                    nodes {
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' > project_data.json
-        fi
+        chmod +x ${{ github.action_path }}/src/get-global-id.sh
+        ${{ github.action_path }}/src/get-global-id.sh
 
-    - name: Set Project Data
-      shell: bash
-      run: |
-        if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
-          echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
-        else
-          echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
-        fi
-
-        field_key_values=$(echo '${{ inputs.FiledKeyValues }}' | jq -c '.[]')
-
-        for key_value in $field_key_values; do
-          field_name=$(echo $key_value | jq -r '.key')
-          value_name=$(echo $key_value | jq -r '.value')
-
-          if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
-            field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
-            value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $option_name) | .id' project_data.json)
-          else
-            field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
-            value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $option_name) | .id' project_data.json)
-          fi
-          enc_data+="$field_id=$value_id,"
-        done
-
-        echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
-
-    - name: Display saved data
-      shell: bash
-      run: |
-        echo "Saved Field IDs and Values: $FIELD_ID_VALUES"
-
-    - name: get-item-id
+    - name: Get Item Id
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
+        REPOSITORY: ${{ github.repository }}
+        EVENT_NAME: ${{ github.event_name }}
+        NUMBER: ${{ github.event.number }}
+        OWNER: ${{ github.repository_owner }}
       run: |
-        REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f2)
+        chmod +x ${{ github.action_path }}/src/get-item-id.sh
+        ${{ github.action_path }}/src/get-item-id.sh
 
-        if [[ "${{ github.event_name }}" == "issues" ]]; then
-          ITEM_ID=$(gh api graphql -f query='
-          query($name: String!) {
-            repository(owner: "${{ github.repository_owner }}", name: $name) {
-              issue(number: ${{ github.event.issue.number }}) {
-                projectItems(first: 1) {
-                  nodes {
-                    id
-                  }
-                }
-              }
-            }
-          }' -f name="$REPOSITORY_NAME" --jq '.data.repository.issue.projectItems.nodes[0].id')
-        else
-          ITEM_ID=$(gh api graphql -f query='
-          query($name: String!) {
-            repository(owner: "${{ github.repository_owner }}", name: $name) {
-              pull_request(number: ${{ github.event.pull_request.number }}) {
-                projectItems(first: 1) {
-                  nodes {
-                    id
-                  }
-                }
-              }
-            }
-          }' -f name="$REPOSITORY_NAME" --jq '.data.repository.pull_request.projectItems.nodes[0].id')
-        fi
-
-        echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
-
-    - name: set-field
+    - name: Set Fields
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
+        FIELD_ID_VALUES: ${{ env.FIELD_ID_VALUES }}
+        ITEM_ID: ${{ env.ITEM_ID }}
+        PROJECT_ID: ${{ env.PROJECT_ID }}
       run: |
-        for field_id_value in $(echo "$FIELD_ID_VALUES" | tr ',' '\n'); do
-          field_id=$(echo $field_id_value | cut -d '=' -f1)
-          value_id=$(echo $field_id_value | cut -d '=' -f2)
-
-          gh project item-edit --id "$ITEM_ID" --field-id "$field_id" --project-id "${{ env.PROJECT_ID }}" --single-select-option-id "$value_id"
-        done
+        chmod +x ${{ github.action_path }}/src/set-fields.sh
+        ${{ github.action_path }}/src/set-fields.sh
