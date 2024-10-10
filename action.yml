@@ -35,35 +35,35 @@ runs:
 
     - name: Get Global Id
       shell: bash
+      run: |
+        chmod +x ./src/get-global-id.sh
+        ./src/get-global-id.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         IS_ORG: ${{ inputs.IsOrganization }}
         OWNER: ${{ github.repository_owner }}
         PROJECT_NUM: ${{ inputs.ProjectsNumber }}
         FIELD_KEY_VALUES: ${{ inputs.FiledKeyValues }}
-      run: |
-        chmod +x ./src/get-global-id.sh
-        ./src/get-global-id.sh
 
     - name: Get Item Id
       shell: bash
+      run: |
+        chmod +x ./src/get-item-id.sh
+        ./src/get-item-id.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         REPOSITORY: ${{ github.repository }}
         EVENT_NAME: ${{ github.event_name }}
         NUMBER: ${{ github.event.number }}
         OWNER: ${{ github.repository_owner }}
-      run: |
-        chmod +x ./src/get-item-id.sh
-        ./src/get-item-id.sh
 
     - name: Set Fields
       shell: bash
+      run: |
+        chmod +x ./src/set-fields.sh
+        ./src/set-fields.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         FIELD_ID_VALUES: ${{ env.FIELD_ID_VALUES }}
         ITEM_ID: ${{ env.ITEM_ID }}
         PROJECT_ID: ${{ env.PROJECT_ID }}
-      run: |
-        chmod +x ./src/set-fields.sh
-        ./src/set-fields.sh
