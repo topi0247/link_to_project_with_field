@@ -131,9 +131,9 @@ runs:
         REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f2)
 
         ITEM_ID=$(gh api graphql -f query='
-          query {
-            repository(owner: ${{ github.repository_owner }}, name: $REPOSITORY_NAME) {
-              issue(number: $NUMBER) {
+          query($name: String!, $issueNumber: Int!) {
+            repository(owner: $owner, name: $name) {
+              issue(number: $issueNumber) {
                 projectItems(first: 1) {
                   nodes {
                     id
@@ -141,7 +141,7 @@ runs:
                 }
               }
             }
-          }' --jq '.data.repository.issue.projectItems.nodes[0].id')
+          }' -f owner="${{ github.repository_owner }}" -f name="$REPOSITORY_NAME" -f issueNumber="$NUMBER"  --jq '.data.repository.issue.projectItems.nodes[0].id')
 
         echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
 
