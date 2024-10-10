@@ -131,7 +131,7 @@ runs:
         REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d '/' -f2)
 
         ITEM_ID=$(gh api graphql -f query='
-          query($owner: String!, $name: String!, $issueNumber: Int!) {
+          query {
             repository(owner: ${{ github.repository_owner }}, name: $REPOSITORY_NAME) {
               issue(number: $NUMBER) {
                 projectItems(first: 1) {
