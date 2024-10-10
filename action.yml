@@ -51,8 +51,8 @@ runs:
     - name: Get Item Id
       shell: bash
       run: |
-        chmod +x ${{ github.action_path }}//src/get-item-id.sh
-        ${{ github.action_path }}//src/get-item-id.sh
+        chmod +x ${{ github.action_path }}/src/get-item-id.sh
+        ${{ github.action_path }}/src/get-item-id.sh
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         REPOSITORY: ${{ github.repository }}

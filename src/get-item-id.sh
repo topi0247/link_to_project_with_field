@@ -4,9 +4,9 @@ set -e
 REPOSITORY_NAME=$(echo "$REPOSITORY" | cut -d '/' -f2)
 
 if [[ "$EVENT_NAME" == "issues" ]]; then
-  QUERY_TARGET="issue(number: \"$NUMBER\")"
+  QUERY_TARGET="issue(number: $NUMBER)"
 else
-  QUERY_TARGET="pull_request(number: \"$NUMBER\")"
+  QUERY_TARGET="pull_request(number: $NUMBER)"
 fi
 
 QUERY="
