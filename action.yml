@@ -21,13 +21,13 @@ runs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        if [[ ${{ github.event.type }} == "Issue" ]]; then
-          URL = ${{ github.event.issue.html_url }}
-        else [[ ${{ github.event.type }} == "PullRequest" ]]; then
-          URL = ${{ github.event.pull_request.html_url }}
+        if [[ ${{ github.event.event_name }} == "issue" ]]; then
+          URL=${{ github.event.issue.html_url }}
+        elif [[ ${{ github.event.event_name }} == "pull_request" ]]; then
+          URL=${{ github.event.pull_request.html_url }}
         fi
 
-        gh project item-add ${{ input.ProjectsNumber }} --owner ${{ github.repository_owner }} --url $URL
+        gh project item-add ${{ inputs.ProjectsNumber }} --owner ${{ github.repository_owner }} --url $URL
 
     - name: get-global-id
       env:
@@ -35,10 +35,10 @@ runs:
       steps:
         - name: Get Project Data
           run: |
-            if [[ ${{ input.IsOrganization }} == "true" ]]; then
+            if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
               gh api graphql -f query='
                 organization(login: "${{ github.repository_owner }}") {
-                  projectV2(number: ${{ input.ProjectsNumber }}) {
+                  projectV2(number: ${{ inputs.ProjectsNumber }}) {
                     id
                     fields(first: 100) {
                       nodes {
@@ -57,7 +57,7 @@ runs:
             else
               gh api graphql -f query='
                 user(login: "${{ github.repository_owner }}") {
-                  projectV2(number: ${{ input.ProjectsNumber }}) {
+                  projectV2(number: ${{ inputs.ProjectsNumber }}) {
                     id
                     fields(first: 100) {
                       nodes {
@@ -76,7 +76,7 @@ runs:
             fi
     - name: Set Project Data
       run: |
-        if [[ ${{ input.IsOrganization }} == "true" ]]; then
+        if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
         else
           echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
@@ -90,7 +90,7 @@ runs:
           field_name=$(echo $kv | jq -r '.key')
           value_name=$(echo $kv | jq -r '.value')
 
-          if [[ ${{ input.IsOrganization }} == "true" ]]; then
+          if [[ ${{ inputs.IsOrganization }} == "true" ]]; then
             field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
             value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $value_name) | .id' project_data.json)
           else
