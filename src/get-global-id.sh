@@ -7,7 +7,7 @@ else
   QUERY_TARGET="user(login: \"$OWNER\")"
 fi
 
-gh api graphql -f query="
+gh api graphql -f query="$(cat <<EOF
   query {
     $QUERY_TARGET {
       projectV2(number: $PROJECT_NUMBER) {
@@ -26,7 +26,9 @@ gh api graphql -f query="
         }
       }
     }
-  }" > project_data.json
+  }
+EOF
+)" > project_data.json
 
 if [[ "$IS_ORG" == "true" ]]; then
   echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
@@ -51,4 +53,3 @@ for key_value in $field_key_values; do
 done
 
 echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
-
