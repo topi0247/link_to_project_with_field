@@ -11,7 +11,7 @@ fi
 
 QUERY="
   query {
-    repository(owner: \"$OWNER\", name: \"$REPOSITORY_NAME\") {
+    repository(owner: \"$OWNER\", name: \"$name\") {
       $QUERY_TARGET {
         projectItems(first: 1) {
           nodes {

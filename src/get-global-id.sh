@@ -29,8 +29,6 @@ QUERY="
   }
 "
 
-echo "QUERY: $QUERY"
-
 gh api graphql -f query="$QUERY" > project_data.json
 
 if [[ "$IS_ORG" == "true" ]]; then
