@@ -40,17 +40,19 @@ runs:
       run: |
         if [[ "${{ inputs.IsOrganization }}" ]]; then
           gh api graphql -f query='
-            organization(login: "${{ github.repository_owner }}") {
-              projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                id
-                fields(first: 100) {
-                  nodes {
-                    ... on ProjectV2SingleSelectField {
-                      id
-                      name
-                      options {
+            query {
+              organization(login: "${{ github.repository_owner }}") {
+                projectV2(number: ${{ inputs.ProjectsNumber }}) {
+                  id
+                  fields(first: 100) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
                         id
                         name
+                        options {
+                          id
+                          name
+                        }
                       }
                     }
                   }
@@ -59,17 +61,19 @@ runs:
             }' > project_data.json
         else
           gh api graphql -f query='
-            user(login: "${{ github.repository_owner }}") {
-              projectV2(number: ${{ inputs.ProjectsNumber }}) {
-                id
-                fields(first: 100) {
-                  nodes {
-                    ... on ProjectV2SingleSelectField {
-                      id
-                      name
-                      options {
+            query {
+              user(login: "${{ github.repository_owner }}") {
+                projectV2(number: ${{ inputs.ProjectsNumber }}) {
+                  id
+                  fields(first: 100) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
                         id
                         name
+                        options {
+                          id
+                          name
+                        }
                       }
                     }
                   }
