@@ -38,7 +38,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
       run: |
-        if [[ "${{ inputs.IsOrganization }}" == "true" ]]; then
+        if [[ "${{ inputs.IsOrganization }}" ]]; then
           gh api graphql -f query='
             organization(login: "${{ github.repository_owner }}") {
               projectV2(number: ${{ inputs.ProjectsNumber }}) {
