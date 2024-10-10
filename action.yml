@@ -57,7 +57,8 @@ runs:
         GH_TOKEN: ${{ inputs.GH_TOKEN }}
         REPOSITORY: ${{ github.repository }}
         EVENT_NAME: ${{ github.event_name }}
-        NUMBER: ${{ github.event.number }}
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         OWNER: ${{ github.repository_owner }}
 
     - name: Set Fields
