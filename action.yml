@@ -33,7 +33,6 @@ runs:
         OWNER: ${{ github.repository_owner }}
         PROJECT_NUM: ${{ inputs.ProjectsNumber }}
       run: |
-        pwd
         chmod +x ${{ github.action_path }}/src/link-project.sh
         ${{ github.action_path }}/src/link-project.sh
 
