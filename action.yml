@@ -2,7 +2,7 @@ name: "Link to Projects with field"
 description: "This Action allows you to tie issues and pull requests to Projects by specifying any value for any field"
 inputs:
   GH_TOKEN:
-    description: "GitHub Token(Required: repo, admin:org, projects)"
+    description: "GitHub Token(Required: repo, admin:org, project)"
     required: true
   IsOrganization:
     description: "Is the repository in an organization"
