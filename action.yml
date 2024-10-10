@@ -15,6 +15,7 @@ inputs:
     required: true
     default: '[{"key": "Status", "value": "Todo"}]'
 runs:
+  using: "composite"
   steps:
     - link-projects:
       env:
