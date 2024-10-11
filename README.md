@@ -62,7 +62,7 @@ on:
 | GH_TOKEN | | PAT Settings |
 | ProjectsNumber | integer | Project Number. The number listed in the URL of the project you wish to set up. Example: 1 if https://github.com/users/{username}/projects/1 |
 | FiledKeyValues | string | The name of the Field you want to set and its value. Currently, only Single Select is supported, so the name of the Field and the name of the Option will be entered. Multiple values can be set here. |
-| IsOrganization | boolean | (option)Whether or not the organization |
+| IsOrganization | boolean | (option)Whether or not the organization.`default: false` |
 
 ### Multiple Field settings
 For example, suppose you want to set the following Field and Option
