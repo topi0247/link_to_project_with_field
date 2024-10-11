@@ -53,6 +53,8 @@ echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
     field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
     value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $option_name) | .id' project_data.json)
   fi
+  echo "field_id=$field_id"
+  echo "value_id=$value_id"
   enc_data+="$field_id=$value_id,"
 done
 
