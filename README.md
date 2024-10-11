@@ -78,7 +78,7 @@ FiledKeyValues: '[{ "key": "Status", "value": "Todo" },{ "key": "Project", "valu
 ```
 Put the associative array into an array and set it as a string.
 
-# Hot to use
+# How to use
 For example, you may want to use the following.
 - You want to automatically set up multiple fields when setting up an issue or pull request for a project.
 - You have a project that contains issues and pull requests from multiple repositories and you want to separate the fields for each repository along with their statuses, such as Todo.
