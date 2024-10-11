@@ -43,8 +43,6 @@ enc_data=""
 echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
   field_name=$(echo "$key_value" | jq -r '.key')
   value_name=$(echo "$key_value" | jq -r '.value')
-  echo "FIELD_NAME=$field_name"
-  echo "VALUE_NAME=$value_name"
 
   if [[ "$IS_ORG" == "true" ]]; then
     field_id=$(jq -r --arg field_name "$field_name" '.data.organization.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
@@ -53,10 +51,8 @@ echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
     field_id=$(jq -r --arg field_name "$field_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name) | .id' project_data.json)
     value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $option_name) | .id' project_data.json)
   fi
-  echo "field_id=$field_id"
-  echo "value_id=$value_id"
-  enc_data+="$field_id=$value_id,"
+
+  $enc_data+="$field_id=$value_id,"
 done
 
-echo "enc_data: $enc_data"
 echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
