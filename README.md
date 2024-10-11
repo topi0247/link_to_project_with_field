@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     name: test
     steps:
-      - uses: topi0247/link_to_projects_with_field@v1.0
+      - uses: topi0247/link_to_projects_with_field@main
         with:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ProjectsNumber: 1
