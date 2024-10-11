@@ -37,9 +37,8 @@ else
   echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
 fi
 
-field_key_values=$(echo "$FIELD_KEY_VALUES" | jq -c '.[]')
-
-for key_value in $field_key_values; do
+enc_data=""
+echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
   field_name=$(echo "$key_value" | jq -r '.key')
   value_name=$(echo "$key_value" | jq -r '.value')
   echo "FIELD_NAME=$field_name"
