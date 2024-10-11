@@ -6,7 +6,7 @@ REPOSITORY_NAME=$(echo "$REPOSITORY" | cut -d '/' -f2)
 if [[ "$EVENT_NAME" == "issues" ]]; then
   QUERY_TARGET="issue(number: $ISSUE_NUMBER)"
 else
-  QUERY_TARGET="pull_request(number: $PR_NUMBER)"
+  QUERY_TARGET="pullRequest(number: $PR_NUMBER)"
 fi
 
 QUERY="
