@@ -30,7 +30,6 @@ QUERY="
 "
 
 gh api graphql -f query="$QUERY" > project_data.json
-cat project_data.json
 
 if [[ "$IS_ORG" == "true" ]]; then
   echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> $GITHUB_ENV
@@ -38,7 +37,7 @@ else
   echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
 fi
 
-echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
+while IFS= read -r key_value; do
   field_name=$(echo "$key_value" | jq -r '.key')
   value_name=$(echo "$key_value" | jq -r '.value')
 
@@ -51,6 +50,6 @@ echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
   fi
 
   enc_data+="$field_id=$value_id,"
-done
+done < <(echo "$FIELD_KEY_VALUES" | jq -c '.[]')
 
 echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
