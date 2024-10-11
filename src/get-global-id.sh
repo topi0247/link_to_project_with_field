@@ -54,5 +54,5 @@ echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
   enc_data+="$field_id=$value_id,"
 done
 
-echo $enc_data
+echo "enc_data: $enc_data"
 echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
