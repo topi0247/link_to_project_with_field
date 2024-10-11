@@ -58,6 +58,7 @@ runs:
         REPOSITORY: ${{ github.repository }}
         EVENT_NAME: ${{ github.event_name }}
         ISSUE_NUMBER: ${{ github.event.issue.number }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         OWNER: ${{ github.repository_owner }}
 
     - name: Set Fields
