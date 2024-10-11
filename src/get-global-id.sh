@@ -40,8 +40,8 @@ fi
 field_key_values=$(echo "$FIELD_KEY_VALUES" | jq -c '.[]')
 
 for key_value in $field_key_values; do
-  field_name=$(echo $key_value | jq -r '.key')
-  value_name=$(echo $key_value | jq -r '.value')
+  field_name=$(echo "$key_value" | jq -r '.key')
+  value_name=$(echo "$key_value" | jq -r '.value')
   echo "FIELD_NAME=$field_name"
   echo "VALUE_NAME=$value_name"
 
