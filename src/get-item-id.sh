@@ -26,7 +26,7 @@ QUERY="
 if [[ "$EVENT_NAME" == "issues" ]]; then
   ITEM_ID=$(gh api graphql -f query="$QUERY" --jq '.data.repository.issue.projectItems.nodes[0].id')
 else
-  ITEM_ID=$(gh api graphql -f query="$QUERY" --jq '.data.repository.pull_request.projectItems.nodes[0].id')
+  ITEM_ID=$(gh api graphql -f query="$QUERY" --jq '.data.repository.pullRequest.projectItems.nodes[0].id')
   echo "ITEM_ID=$ITEM_ID"
 fi
 
