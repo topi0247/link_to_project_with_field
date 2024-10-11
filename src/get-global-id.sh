@@ -38,8 +38,6 @@ else
   echo "PROJECT_ID=$(jq -r '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
 fi
 
-
-enc_data=""
 echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
   field_name=$(echo "$key_value" | jq -r '.key')
   value_name=$(echo "$key_value" | jq -r '.value')
@@ -52,7 +50,7 @@ echo "$FIELD_KEY_VALUES" | jq -c '.[]' | while IFS= read -r key_value; do
     value_id=$(jq -r --arg field_name "$field_name" --arg option_name "$value_name" '.data.user.projectV2.fields.nodes[] | select(.name == $field_name).options[] | select(.name == $option_name) | .id' project_data.json)
   fi
 
-  $enc_data+="$field_id=$value_id,"
+  enc_data+="$field_id=$value_id,"
 done
 
 echo "FIELD_ID_VALUES=$(echo "$enc_data" | sed 's/,$//')" >> $GITHUB_ENV
